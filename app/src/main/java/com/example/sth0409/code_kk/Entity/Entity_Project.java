@@ -1,12 +1,16 @@
 package com.example.sth0409.code_kk.Entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by STH0409 on 2016/11/15.
  */
 
-public class Entity_Project {
+public class Entity_Project implements Parcelable {
     /**
      * projectName : DoubleScroll
      * createTime : 2016-11-14T13:20:54.767Z
@@ -49,7 +53,7 @@ public class Entity_Project {
     private String _id;
     private String codeKKUrl;
     private String officialUrl;
-    private List<TagsBean> tags;
+    private List<TagsBean> tags ;
 
     public String getProjectName() {
         return projectName;
@@ -211,7 +215,7 @@ public class Entity_Project {
         this.tags = tags;
     }
 
-    public static class TagsBean {
+    public static class TagsBean implements Parcelable {
         /**
          * createTime : 2016-11-14T13:20:54.767Z
          * name : RecyclerView
@@ -255,5 +259,108 @@ public class Entity_Project {
         public void setType(String type) {
             this.type = type;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(this.createTime);
+            dest.writeString(this.name);
+            dest.writeString(this.userName);
+            dest.writeString(this.type);
+        }
+
+        public TagsBean() {
+        }
+
+        protected TagsBean(Parcel in) {
+            this.createTime = in.readString();
+            this.name = in.readString();
+            this.userName = in.readString();
+            this.type = in.readString();
+        }
+
+        public static final Creator<TagsBean> CREATOR = new Creator<TagsBean>() {
+            @Override
+            public TagsBean createFromParcel(Parcel source) {
+                return new TagsBean(source);
+            }
+
+            @Override
+            public TagsBean[] newArray(int size) {
+                return new TagsBean[size];
+            }
+        };
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.projectName);
+        dest.writeString(this.createTime);
+        dest.writeString(this.updateTime);
+        dest.writeInt(this.expiredTimes);
+        dest.writeInt(this.usedTimes);
+        dest.writeInt(this.voteUp);
+        dest.writeByte(this.recommend ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.hide ? (byte) 1 : (byte) 0);
+        dest.writeString(this.projectUrl);
+        dest.writeString(this.desc);
+        dest.writeString(this.demoUrl);
+        dest.writeString(this.committer);
+        dest.writeString(this.source);
+        dest.writeString(this.lang);
+        dest.writeString(this.authorName);
+        dest.writeString(this.authorUrl);
+        dest.writeString(this._id);
+        dest.writeString(this.codeKKUrl);
+        dest.writeString(this.officialUrl);
+        dest.writeList(this.tags);
+    }
+
+    public Entity_Project() {
+    }
+
+    protected Entity_Project(Parcel in) {
+        this.projectName = in.readString();
+        this.createTime = in.readString();
+        this.updateTime = in.readString();
+        this.expiredTimes = in.readInt();
+        this.usedTimes = in.readInt();
+        this.voteUp = in.readInt();
+        this.recommend = in.readByte() != 0;
+        this.hide = in.readByte() != 0;
+        this.projectUrl = in.readString();
+        this.desc = in.readString();
+        this.demoUrl = in.readString();
+        this.committer = in.readString();
+        this.source = in.readString();
+        this.lang = in.readString();
+        this.authorName = in.readString();
+        this.authorUrl = in.readString();
+        this._id = in.readString();
+        this.codeKKUrl = in.readString();
+        this.officialUrl = in.readString();
+        this.tags = new ArrayList<TagsBean>();
+        in.readList(this.tags, TagsBean.class.getClassLoader());
+    }
+
+    public static final Creator<Entity_Project> CREATOR = new Creator<Entity_Project>() {
+        @Override
+        public Entity_Project createFromParcel(Parcel source) {
+            return new Entity_Project(source);
+        }
+
+        @Override
+        public Entity_Project[] newArray(int size) {
+            return new Entity_Project[size];
+        }
+    };
 }

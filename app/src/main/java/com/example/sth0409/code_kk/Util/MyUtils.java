@@ -11,7 +11,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,7 +30,8 @@ public class MyUtils {
                 EntityDataMap entityDataMap = new EntityDataMap();
                 entityDataMap.setmDate(key1);
                 if (projectDateMap.get(key1) instanceof JSONArray) {
-                    entityDataMap.setmArray((JSONArray) projectDateMap.get(key1));
+                    entityDataMap.setJsonArray(((String.valueOf((JSONArray) projectDateMap.get(key1)))));
+                   // entityDataMap.setmArray((JSONArray) projectDateMap.get(key1));
                 }
                 entityDataMaps.add(entityDataMap);
             }

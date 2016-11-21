@@ -1,13 +1,16 @@
 package com.example.sth0409.code_kk;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+
+import com.example.sth0409.code_kk.Entity.Entity_Project;
 import com.example.sth0409.code_kk.Util.MyUtils;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 
 
 public class Main2Activity extends AppCompatActivity {
@@ -16,16 +19,20 @@ public class Main2Activity extends AppCompatActivity {
     @BindView(R.id.webView)
     WebView webView;
     String result;
-    String Url = "http://p.codekk.com/detail/Android/CarGuo/GSYVideoPlayer";
+    String Url = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         ButterKnife.bind(this);
+        Intent intent = getIntent();
+        Entity_Project entity_project = intent.getParcelableExtra("project");
+        Url = entity_project.getCodeKKUrl();
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 result = MyUtils.parseAndformatHtml(Url);
                 runOnUiThread(new Runnable() {
                     @Override
@@ -38,6 +45,7 @@ public class Main2Activity extends AppCompatActivity {
         }).start();
 
     }
+
     private void initWebView() {
         WebSettings ws = webView.getSettings();
         webView.setVerticalScrollBarEnabled(false);

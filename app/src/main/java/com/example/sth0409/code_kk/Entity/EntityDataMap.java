@@ -11,14 +11,18 @@ import org.json.JSONArray;
 
 public class EntityDataMap implements Parcelable {
     public String mDate;
+    public  String jsonArray;
+
+    public EntityDataMap(String mDate, JSONArray mArray, String jsonArray) {
+        this.mDate = mDate;
+        this.mArray = mArray;
+        this.jsonArray = jsonArray;
+    }
+
     public JSONArray mArray;
 
     public EntityDataMap() {
-    }
 
-    public EntityDataMap(String mDate, JSONArray mArray) {
-        this.mDate = mDate;
-        this.mArray = mArray;
     }
 
     public String getmDate() {
@@ -37,6 +41,14 @@ public class EntityDataMap implements Parcelable {
         this.mArray = mArray;
     }
 
+    public String getJsonArray() {
+        return jsonArray;
+    }
+
+    public void setJsonArray(String jsonArray) {
+        this.jsonArray = jsonArray;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -45,15 +57,15 @@ public class EntityDataMap implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mDate);
-        dest.writeParcelable((Parcelable) this.mArray, flags);
+        dest.writeString(this.jsonArray);
     }
 
     protected EntityDataMap(Parcel in) {
         this.mDate = in.readString();
-        this.mArray = in.readParcelable(JSONArray.class.getClassLoader());
+        this.jsonArray = in.readString();
     }
 
-    public static final Parcelable.Creator<EntityDataMap> CREATOR = new Parcelable.Creator<EntityDataMap>() {
+    public static final Creator<EntityDataMap> CREATOR = new Creator<EntityDataMap>() {
         @Override
         public EntityDataMap createFromParcel(Parcel source) {
             return new EntityDataMap(source);

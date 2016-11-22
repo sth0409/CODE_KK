@@ -19,8 +19,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Ui.DetailActivity"
-            android:theme="@style/Theme.AppCompat">></activity>
+        <activity
+            android:name=".Ui.DetailActivity"
+            android:theme="@style/Theme.AppCompat">
+            >
+        </activity>
+        <activity android:name=".Main3Activity" >
+
+        </activity>
+        <activity android:name=".Main5Activity"></activity>
     </application>
 
 </manifest>

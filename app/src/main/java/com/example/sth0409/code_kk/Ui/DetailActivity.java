@@ -1,13 +1,15 @@
 package com.example.sth0409.code_kk.Ui;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -25,6 +27,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 public class DetailActivity extends AppCompatActivity implements TagCloudView.OnTagClickListener {
@@ -52,7 +55,8 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
     NestedScrollView bottomSheet;
     @BindView(R.id.coord1)
     CoordinatorLayout coord1;
-
+    String TAG = "DetailActivity";
+    List<Entity_Project.TagsBean> tagsBeens;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +66,13 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
 
         Intent intent = getIntent();
         Entity_Project entity_project = intent.getParcelableExtra("project");
+
         Url = entity_project.getCodeKKUrl();
         title = entity_project.getProjectName();
-        p_url = entity_project.getDemoUrl();
+        p_url = entity_project.getProjectUrl();
         p_doc = entity_project.getDesc();
+        tagsBeens = entity_project.getTags();
+        Log.i(TAG, "onCreate: " + p_doc);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -74,6 +81,7 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        Log.i(TAG, "onCreate: " + p_doc);
                         initBottomSheet();
                         initWeiget();
                         initTagView();
@@ -86,6 +94,7 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         }).start();
 
     }
+
     private void setActionBar(String actionBar) {
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -95,6 +104,7 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
 
         getSupportActionBar().setElevation(0);
     }
+
     private void initBottomSheet() {
         final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
 
@@ -132,8 +142,9 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
 
     private void initTagView() {
 
-        for (int i = 0; i < 20; i++) {
-            tags.add("标签" + i);
+        for (int i = 0; i < tagsBeens.size(); i++) {
+            tags.add(tagsBeens.get(i).getName());
+            Log.i("----", "initTagView: " + tagsBeens.get(i).getName());
         }
 
         tagCloudView.setTags(tags);
@@ -163,11 +174,29 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
     @Override
     public void onTagClick(int position) {
         if (position == -1) {
-            Toast.makeText(getApplicationContext(), "点击末尾文字",
-                    Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "点击末尾文字",
+//                    Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(), "点击 position : " + position,
-                    Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "点击 position : " + position,
+//                    Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @OnClick(R.id.tv_d_project_url)
+    public void onClick() {
+        AlertDialog alertDialog=new  AlertDialog.Builder(DetailActivity.this)
+                .setMessage("是否打开"+p_url+"  ?")
+                .setNegativeButton("否",null)
+                .setPositiveButton("是", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Uri uri=Uri.parse(p_url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            }
+        }).show();
+
+
+
     }
 }

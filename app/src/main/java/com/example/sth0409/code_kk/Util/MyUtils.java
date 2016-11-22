@@ -20,7 +20,7 @@ import java.util.List;
 
 public class MyUtils {
     public static List<EntityDataMap> getEntitys(String jsonMessage, List<EntityDataMap> entityDataMaps) {
-        String str2 = jsonMessage.replaceAll(" ", "");
+        String str2 = jsonMessage;
         try {
             JSONObject jsonObject = new JSONObject(str2);
             JSONObject jsonObject_data = jsonObject.getJSONObject("data");

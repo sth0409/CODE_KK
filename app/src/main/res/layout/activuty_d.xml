@@ -42,12 +42,12 @@
             android:id="@+id/tag_cloud_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             app:tcvBorder="8dp"
             app:tcvCanTagClick="true"
             app:tcvItemBorderHorizontal="8dp"
             app:tcvItemBorderVertical="6dp"
-            app:tcvSingleLine="true"
+            app:tcvSingleLine="false"
             app:tcvTextColor="#123455"></com.example.sth0409.code_kk.TagCloud.TagCloudView>
     </LinearLayout>
 

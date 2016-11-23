@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/coord1"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,13 +12,26 @@
 
         android:padding="5dp">
 
-        <TextView
-            android:id="@+id/tv_d_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:lines="2"
-            android:text="这里是标题"
-            android:textSize="30sp" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_d_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:lines="2"
+                android:text="这里是标题"
+                android:textSize="30sp" />
+
+            <ImageView
+                android:id="@+id/iv_islike"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/dislike" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tv_d_project_url"
@@ -63,6 +75,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/tv_content_hand"
                 android:layout_width="match_parent"

@@ -3,7 +3,8 @@
     package="com.example.sth0409.code_kk">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
     <application
         android:name=".GApp"
         android:allowBackup="true"
@@ -11,7 +12,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity" >
+
+        </activity>
         <activity android:name=".Ui.ListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

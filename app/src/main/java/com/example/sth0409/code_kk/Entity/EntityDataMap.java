@@ -3,6 +3,8 @@ package com.example.sth0409.code_kk.Entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.sqliteutil.Table;
+
 import org.json.JSONArray;
 
 /**

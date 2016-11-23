@@ -1,7 +1,9 @@
 package com.example.sth0409.code_kk.Ui;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,10 +16,16 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.example.sqliteutil.DaoFactory;
+import com.example.sqliteutil.DbSqlite;
+import com.example.sqliteutil.IBaseDao;
 import com.example.sth0409.code_kk.Entity.Entity_Project;
+
+import com.example.sth0409.code_kk.Entity.TagsBean;
 import com.example.sth0409.code_kk.R;
 import com.example.sth0409.code_kk.TagCloud.TagCloudView;
 import com.example.sth0409.code_kk.Util.MyUtils;
@@ -56,7 +64,10 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
     @BindView(R.id.coord1)
     CoordinatorLayout coord1;
     String TAG = "DetailActivity";
-    List<Entity_Project.TagsBean> tagsBeens;
+    List<TagsBean> tagsBeens;
+    @BindView(R.id.iv_islike)
+    ImageView ivIslike;
+    Entity_Project entity_project;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +76,9 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         ButterKnife.bind(this);
 
         Intent intent = getIntent();
-        Entity_Project entity_project = intent.getParcelableExtra("project");
-
+        entity_project = intent.getParcelableExtra("project");
+        initSQL();
+        tagsBeens = new ArrayList<>();
         Url = entity_project.getCodeKKUrl();
         title = entity_project.getProjectName();
         p_url = entity_project.getProjectUrl();
@@ -84,6 +96,7 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
                         Log.i(TAG, "onCreate: " + p_doc);
                         initBottomSheet();
                         initWeiget();
+
                         initTagView();
                         initWebView();
                         setActionBar(title);
@@ -95,6 +108,53 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
 
     }
 
+    /**
+     * 查询项目是否存在
+     *
+     * @param query_entity_project 待查项目实体
+     * @return 是否存在于数据库
+     */
+    private boolean querySQL(Entity_Project query_entity_project) {
+        Entity_Project entity_project = userDAO.queryFirstRecord("user_projectName=?", query_entity_project.getProjectName());
+        if (entity_project != null) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 插入一条信息
+     */
+    private void insertSQL(Entity_Project entity_project) {
+//        Entity_Project sqLite_project = new Entity_Project();
+//        sqLite_project.setProjectName("test");
+//        sqLite_project.set_id("123456");
+        userDAO.insert(entity_project);
+    }
+
+    private void delSQL(Entity_Project del_entity_project) {
+        userDAO.delete("user_projectName=?", del_entity_project.getProjectName());
+    }
+
+    private IBaseDao<Entity_Project> userDAO;
+
+    /**
+     * 创建db文件，创建表
+     */
+    private void initSQL() {
+        SQLiteDatabase db = this.openOrCreateDatabase("mylikeproject.db", Context.MODE_PRIVATE, null);
+        DbSqlite dbSqlite = new DbSqlite(this, db);
+        userDAO = DaoFactory.createGenericDao(dbSqlite, Entity_Project.class);
+        userDAO.createTable();
+    }
+
+    /**
+     * if (item.isLike()){
+     * Glide.with(context).load(R.drawable.dolike).into((ImageView) holder.getView(R.id.iv_islike));
+     * }
+     *
+     * @param actionBar
+     */
     private void setActionBar(String actionBar) {
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -134,14 +194,37 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         });
     }
 
+    boolean islike;
+
     private void initWeiget() {
         tvDTitle.setText(title);
         tvDProjectUrl.setText(p_url);
         tvDProjectDoc.setText(p_doc);
+        checkIsLike();
+
+    }
+
+    private void checkIsLike() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                islike = querySQL(entity_project);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (islike) {
+                            Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
+                        }
+                    }
+                });
+            }
+        }).start();
     }
 
     private void initTagView() {
-
+        if (tagsBeens == null) {
+            return;
+        }
         for (int i = 0; i < tagsBeens.size(); i++) {
             tags.add(tagsBeens.get(i).getName());
             Log.i("----", "initTagView: " + tagsBeens.get(i).getName());
@@ -182,21 +265,37 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         }
     }
 
-    @OnClick(R.id.tv_d_project_url)
-    public void onClick() {
-        AlertDialog alertDialog=new  AlertDialog.Builder(DetailActivity.this)
-                .setMessage("是否打开"+p_url+"  ?")
-                .setNegativeButton("否",null)
-                .setPositiveButton("是", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Uri uri=Uri.parse(p_url);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
-        }).show();
+    @OnClick({R.id.tv_d_project_url, R.id.iv_islike})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.tv_d_project_url:
+                AlertDialog alertDialog = new AlertDialog.Builder(DetailActivity.this)
+                        .setMessage("是否打开" + p_url + "  ?")
+                        .setNegativeButton("否", null)
+                        .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Uri uri = Uri.parse(p_url);
+                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                startActivity(intent);
+                            }
+                        }).show();
 
-
-
+                break;
+            case R.id.iv_islike:
+                Log.i(TAG, "onClick:-------- "+islike);
+                if (!islike) {
+                    insertSQL(entity_project);
+                    Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
+                    islike=true;
+                } else {
+                    Glide.with(DetailActivity.this).load(R.drawable.dislike).into(ivIslike);
+                    delSQL(entity_project);
+                    islike=false;
+                }
+                break;
+        }
     }
+
+
 }

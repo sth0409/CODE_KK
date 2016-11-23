@@ -3,14 +3,25 @@ package com.example.sth0409.code_kk.Entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.sqliteutil.Table;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by STH0409 on 2016/11/15.
  */
-
+@Table(name="t_user")
 public class Entity_Project implements Parcelable {
+    public boolean isLike() {
+        return isLike;
+    }
+
+    public void setLike(boolean like) {
+        isLike = like;
+    }
+
+    private   boolean isLike;
     /**
      * projectName : DoubleScroll
      * createTime : 2016-11-14T13:20:54.767Z
@@ -34,26 +45,11 @@ public class Entity_Project implements Parcelable {
      * officialUrl : https://play.google.com/store/apps/details?id=org.anothermonitor
      */
 
+    @Table.Column(name="user_projectName",type= Table.Column.TYPE_STRING,isPrimaryKey=true)
     private String projectName;
+
+    @Table.Column(name="user_createTime",type= Table.Column.TYPE_STRING)
     private String createTime;
-    private String updateTime;
-    private int expiredTimes;
-    private int usedTimes;
-    private int voteUp;
-    private boolean recommend;
-    private boolean hide;
-    private String projectUrl;
-    private String desc;
-    private String demoUrl;
-    private String committer;
-    private String source;
-    private String lang;
-    private String authorName;
-    private String authorUrl;
-    private String _id;
-    private String codeKKUrl;
-    private String officialUrl;
-    private List<TagsBean> tags ;
 
     public String getProjectName() {
         return projectName;
@@ -79,43 +75,43 @@ public class Entity_Project implements Parcelable {
         this.updateTime = updateTime;
     }
 
-    public int getExpiredTimes() {
+    public Integer getExpiredTimes() {
         return expiredTimes;
     }
 
-    public void setExpiredTimes(int expiredTimes) {
+    public void setExpiredTimes(Integer expiredTimes) {
         this.expiredTimes = expiredTimes;
     }
 
-    public int getUsedTimes() {
+    public Integer getUsedTimes() {
         return usedTimes;
     }
 
-    public void setUsedTimes(int usedTimes) {
+    public void setUsedTimes(Integer usedTimes) {
         this.usedTimes = usedTimes;
     }
 
-    public int getVoteUp() {
+    public Integer getVoteUp() {
         return voteUp;
     }
 
-    public void setVoteUp(int voteUp) {
+    public void setVoteUp(Integer voteUp) {
         this.voteUp = voteUp;
     }
 
-    public boolean isRecommend() {
+    public Boolean getRecommend() {
         return recommend;
     }
 
-    public void setRecommend(boolean recommend) {
+    public void setRecommend(Boolean recommend) {
         this.recommend = recommend;
     }
 
-    public boolean isHide() {
+    public Boolean getHide() {
         return hide;
     }
 
-    public void setHide(boolean hide) {
+    public void setHide(Boolean hide) {
         this.hide = hide;
     }
 
@@ -215,85 +211,61 @@ public class Entity_Project implements Parcelable {
         this.tags = tags;
     }
 
-    public static class TagsBean implements Parcelable {
-        /**
-         * createTime : 2016-11-14T13:20:54.767Z
-         * name : RecyclerView
-         * userName : georgeyang1024
-         * type : open-source-project
-         */
+    @Table.Column(name="user_updateTime",type= Table.Column.TYPE_STRING)
+    private String updateTime;
 
-        private String createTime;
-        private String name;
-        private String userName;
-        private String type;
+    @Table.Column(name="user_expiredTimes",type= Table.Column.TYPE_INTEGER)
+    private Integer  expiredTimes;
 
-        public String getCreateTime() {
-            return createTime;
-        }
+    @Table.Column(name="user_usedTimes",type= Table.Column.TYPE_INTEGER)
+    private Integer  usedTimes;
 
-        public void setCreateTime(String createTime) {
-            this.createTime = createTime;
-        }
+    @Table.Column(name="user_voteUp",type= Table.Column.TYPE_INTEGER)
+    private Integer  voteUp;
 
-        public String getName() {
-            return name;
-        }
+    @Table.Column(name="user_recommend",type= Table.Column.TYPE_BOOLEAN)
+    private Boolean  recommend;
 
-        public void setName(String name) {
-            this.name = name;
-        }
+    @Table.Column(name="user_hide",type= Table.Column.TYPE_BOOLEAN)
+    private Boolean  hide;
 
-        public String getUserName() {
-            return userName;
-        }
+    @Table.Column(name="user_projectUrl",type= Table.Column.TYPE_STRING)
+    private String projectUrl;
 
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
+    @Table.Column(name="user_desc",type= Table.Column.TYPE_STRING)
+    private String desc;
 
-        public String getType() {
-            return type;
-        }
+    @Table.Column(name="user_demoUrl",type= Table.Column.TYPE_STRING)
+    private String demoUrl;
 
-        public void setType(String type) {
-            this.type = type;
-        }
+    @Table.Column(name="user_committer",type= Table.Column.TYPE_STRING)
+    private String committer;
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
+    @Table.Column(name="user_source",type= Table.Column.TYPE_STRING)
+    private String source;
 
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(this.createTime);
-            dest.writeString(this.name);
-            dest.writeString(this.userName);
-            dest.writeString(this.type);
-        }
+    @Table.Column(name="user_lang",type= Table.Column.TYPE_STRING)
+    private String lang;
 
-        public TagsBean() {
-        }
+    @Table.Column(name="user_authorName",type= Table.Column.TYPE_STRING)
+    private String authorName;
 
-        protected TagsBean(Parcel in) {
-            this.createTime = in.readString();
-            this.name = in.readString();
-            this.userName = in.readString();
-            this.type = in.readString();
-        }
+    @Table.Column(name="user_authorUrl",type= Table.Column.TYPE_STRING)
+    private String authorUrl;
 
-        public static final Creator<TagsBean> CREATOR = new Creator<TagsBean>() {
-            @Override
-            public TagsBean createFromParcel(Parcel source) {
-                return new TagsBean(source);
-            }
+    @Table.Column(name="user__id",type= Table.Column.TYPE_STRING)
+    private String _id;
 
-            @Override
-            public TagsBean[] newArray(int size) {
-                return new TagsBean[size];
-            }
-        };
+    @Table.Column(name="user_codeKKUrl",type= Table.Column.TYPE_STRING)
+    private String codeKKUrl;
+
+    @Table.Column(name="user_officialUrl",type= Table.Column.TYPE_STRING)
+    private String officialUrl;
+
+    @Table.Column(name="user_tags",type= Table.Column.TYPE_BLOB)
+    private List<TagsBean> tags ;
+
+    public Entity_Project() {
     }
 
     @Override
@@ -303,14 +275,15 @@ public class Entity_Project implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte(this.isLike ? (byte) 1 : (byte) 0);
         dest.writeString(this.projectName);
         dest.writeString(this.createTime);
         dest.writeString(this.updateTime);
-        dest.writeInt(this.expiredTimes);
-        dest.writeInt(this.usedTimes);
-        dest.writeInt(this.voteUp);
-        dest.writeByte(this.recommend ? (byte) 1 : (byte) 0);
-        dest.writeByte(this.hide ? (byte) 1 : (byte) 0);
+        dest.writeValue(this.expiredTimes);
+        dest.writeValue(this.usedTimes);
+        dest.writeValue(this.voteUp);
+        dest.writeValue(this.recommend);
+        dest.writeValue(this.hide);
         dest.writeString(this.projectUrl);
         dest.writeString(this.desc);
         dest.writeString(this.demoUrl);
@@ -322,21 +295,19 @@ public class Entity_Project implements Parcelable {
         dest.writeString(this._id);
         dest.writeString(this.codeKKUrl);
         dest.writeString(this.officialUrl);
-        dest.writeList(this.tags);
-    }
-
-    public Entity_Project() {
+        dest.writeTypedList(this.tags);
     }
 
     protected Entity_Project(Parcel in) {
+        this.isLike = in.readByte() != 0;
         this.projectName = in.readString();
         this.createTime = in.readString();
         this.updateTime = in.readString();
-        this.expiredTimes = in.readInt();
-        this.usedTimes = in.readInt();
-        this.voteUp = in.readInt();
-        this.recommend = in.readByte() != 0;
-        this.hide = in.readByte() != 0;
+        this.expiredTimes = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.usedTimes = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.voteUp = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.recommend = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        this.hide = (Boolean) in.readValue(Boolean.class.getClassLoader());
         this.projectUrl = in.readString();
         this.desc = in.readString();
         this.demoUrl = in.readString();
@@ -348,8 +319,7 @@ public class Entity_Project implements Parcelable {
         this._id = in.readString();
         this.codeKKUrl = in.readString();
         this.officialUrl = in.readString();
-        this.tags = new ArrayList<TagsBean>();
-        in.readList(this.tags, TagsBean.class.getClassLoader());
+        this.tags = in.createTypedArrayList(TagsBean.CREATOR);
     }
 
     public static final Creator<Entity_Project> CREATOR = new Creator<Entity_Project>() {

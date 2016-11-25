@@ -10,16 +10,12 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/tagcloudlibrary" />
-            <option value="$PROJECT_DIR$/tagcloudview" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/tagcloudlibrary" />
-            <option value="$PROJECT_DIR$/tagcloudview" />
           </set>
         </option>
       </GradleProjectSettings>

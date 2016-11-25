@@ -36,6 +36,11 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 
 public class DetailActivity extends AppCompatActivity implements TagCloudView.OnTagClickListener {
@@ -85,26 +90,46 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         p_doc = entity_project.getDesc();
         tagsBeens = entity_project.getTags();
         Log.i(TAG, "onCreate: " + p_doc);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-//ok
-                result = MyUtils.parseAndformatHtml(Url);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.i(TAG, "onCreate: " + p_doc);
-                        initBottomSheet();
-                        initWeiget();
 
-                        initTagView();
-                        initWebView();
-                        setActionBar(title);
-                        webContent.loadDataWithBaseURL(null, result, "text/html", "utf-8", null);
-                    }
-                });
+        /**
+         *  Observable.create(new Observable.OnSubscribe<Boolean>() {
+        @Override public void call(Subscriber<? super Boolean> subscriber) {
+        //异步操作相关代码
+        subscriber.onNext(islike = querySQL(entity_project));
+        }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+         .subscribe(new Action1<Boolean>(){
+        @Override public void call(Boolean data) {
+        if (data) {
+        Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
+        }
+        // 主线程操作
+        }
+        });
+
+         */
+
+        Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                result = MyUtils.parseAndformatHtml(Url);
+                subscriber.onNext(result);
+                subscriber.onCompleted();
             }
-        }).start();
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<String>() {
+
+            @Override
+            public void call(String s) {
+                Log.i(TAG, "onCreate: " + p_doc);
+                initBottomSheet();
+                initWeiget();
+                initTagView();
+                initWebView();
+                setActionBar(title);
+                webContent.loadDataWithBaseURL(null, s, "text/html", "utf-8", null);
+            }
+        });
+
 
     }
 
@@ -133,6 +158,7 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
     }
 
     private void delSQL(Entity_Project del_entity_project) {
+        setResult(999,new Intent().putExtra("haveDel",0));
         userDAO.delete("user_projectName=?", del_entity_project.getProjectName());
     }
 
@@ -200,7 +226,28 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         tvDTitle.setText(title);
         tvDProjectUrl.setText(p_url);
         tvDProjectDoc.setText(p_doc);
-        checkIsLike();
+        //  checkIsLike();
+        checkIsLikebyRxJava();
+    }
+
+    private void checkIsLikebyRxJava() {
+        Observable.create(new Observable.OnSubscribe<Boolean>() {
+            @Override
+            public void call(Subscriber<? super Boolean> subscriber) {
+                //异步操作相关代码
+                subscriber.onNext(islike = querySQL(entity_project));
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean data) {
+                        if (data) {
+                            Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
+                        }
+                        // 主线程操作
+                    }
+                });
+
 
     }
 
@@ -283,15 +330,15 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
 
                 break;
             case R.id.iv_islike:
-                Log.i(TAG, "onClick:-------- "+islike);
+                Log.i(TAG, "onClick:-------- " + islike);
                 if (!islike) {
                     insertSQL(entity_project);
                     Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
-                    islike=true;
+                    islike = true;
                 } else {
                     Glide.with(DetailActivity.this).load(R.drawable.dislike).into(ivIslike);
                     delSQL(entity_project);
-                    islike=false;
+                    islike = false;
                 }
                 break;
         }

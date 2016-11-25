@@ -4,8 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CODE_KK.iml" filepath="$PROJECT_DIR$/CODE_KK.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/tagcloudlibrary/tagcloudlibrary.iml" filepath="$PROJECT_DIR$/tagcloudlibrary/tagcloudlibrary.iml" />
-      <module fileurl="file://$PROJECT_DIR$/tagcloudview/tagcloudview.iml" filepath="$PROJECT_DIR$/tagcloudview/tagcloudview.iml" />
     </modules>
   </component>
 </project>

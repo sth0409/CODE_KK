@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.sth0409.code_kk.Config.Configer;
 import com.example.sth0409.code_kk.Entity.EntityDataMap;
 import com.example.sth0409.code_kk.Entity.Entity_Project;
@@ -25,6 +26,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +45,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        
+        initRxJava();
+        
+        
+        
+        
+        
         entityDataMaps = new ArrayList<>();
         entityProjects = new ArrayList<>();
         progressDialog = new ProgressDialog(MainActivity.this);
@@ -73,4 +86,26 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private void initRxJava() {
+//        Observable.create(new Observable.OnSubscribe<Boolean>() {
+//            @Override
+//            public void call(Subscriber<? super Boolean> subscriber) {
+//                //异步操作相关代码
+//                subscriber.onNext( islike = querySQL(entity_project));
+//            }
+//        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Action1<Boolean>(){
+//
+//                    @Override
+//                    public void call(Boolean data) {
+//                        if (islike) {
+//                            Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
+//                        }
+//                        // 主线程操作
+//                    }
+//                });
+//
+//
+//    }
+    }
 }

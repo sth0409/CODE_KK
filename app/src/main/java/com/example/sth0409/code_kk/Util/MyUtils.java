@@ -69,6 +69,7 @@ public class MyUtils {
             content = Jsoup.parse(doc.toString());
         } catch (Exception e) {
             e.printStackTrace();
+
         }
         //Android 上图片加载库 Fresco 的使用帮助类
         Element body = content.body();

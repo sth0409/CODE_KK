@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,18 +12,30 @@
     <com.superrecycleview.superlibrary.recycleview.SuperRecyclerView
         android:id="@+id/re_list_activity"
         android:layout_width="match_parent"
-        android:background="@drawable/back_shape"
-        android:layout_height="match_parent"></com.superrecycleview.superlibrary.recycleview.SuperRecyclerView>
+        android:layout_height="match_parent"
+        android:background="@drawable/back_shape"></com.superrecycleview.superlibrary.recycleview.SuperRecyclerView>
+
+    <com.arlib.floatingsearchview.FloatingSearchView
+        android:id="@+id/floating_search_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:floatingSearch_close_search_on_keyboard_dismiss="true"
+        app:floatingSearch_leftActionMode="showHamburger"
+        app:floatingSearch_searchHint="Search..."
+        app:floatingSearch_showSearchKey="false"
+
+        app:floatingSearch_suggestionsListAnimDuration="250" />
 
     <ImageView
+        android:id="@+id/menu"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:id="@+id/menu"
-        android:padding="10dp"
-        android:layout_margin="20dp"
-        android:src="@mipmap/yuan"
         android:layout_gravity="right|bottom"
-        android:background="#0FD59D" />
+        android:layout_margin="20dp"
+        android:background="#0FD59D"
+        android:padding="10dp"
+        android:src="@mipmap/yuan" />
 
 
 </FrameLayout>

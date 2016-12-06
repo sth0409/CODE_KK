@@ -72,12 +72,16 @@ public class MyUtils {
 
         }
         //Android 上图片加载库 Fresco 的使用帮助类
-        Element body = content.body();
-        result=body.getElementsByClass("container theme-showcase")
-                .first()
-                .getElementsByClass("hero-unit border div-detail")
-                .first()
-                .getElementsByClass("border-top div-row").toString();
+        try {
+            Element body = content.body();
+            result=body.getElementsByClass("container theme-showcase")
+                    .first()
+                    .getElementsByClass("hero-unit border div-detail")
+                    .first()
+                    .getElementsByClass("border-top div-row").toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return result;
     }
 }

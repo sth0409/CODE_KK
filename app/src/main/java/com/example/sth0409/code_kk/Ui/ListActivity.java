@@ -2,16 +2,19 @@ package com.example.sth0409.code_kk.Ui;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +23,8 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.arlib.floatingsearchview.FloatingSearchView;
+import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.bumptech.glide.Glide;
 import com.example.sqliteutil.DaoFactory;
 import com.example.sqliteutil.DbSqlite;
@@ -29,15 +34,23 @@ import com.example.sth0409.code_kk.Adapter.Adapter_Project;
 import com.example.sth0409.code_kk.Config.Configer;
 import com.example.sth0409.code_kk.Entity.EntityDataMap;
 import com.example.sth0409.code_kk.Entity.Entity_Project;
+import com.example.sth0409.code_kk.Entity.SearchBean;
+import com.example.sth0409.code_kk.MyAcitivity;
 import com.example.sth0409.code_kk.R;
 import com.example.sth0409.code_kk.Util.MyUtils;
+import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.request.BaseRequest;
+
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.superrecycleview.superlibrary.adapter.SuperBaseAdapter;
 import com.superrecycleview.superlibrary.recycleview.ProgressStyle;
 import com.superrecycleview.superlibrary.recycleview.SuperRecyclerView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +66,7 @@ import okhttp3.Response;
 /**
  * 改完bug，在公司电脑上更新下，加入了列表嵌套，基本能显示了，接下来就是buttomSheet了
  */
-public class ListActivity extends AppCompatActivity implements SuperRecyclerView.LoadingListener {
+public class ListActivity extends MyAcitivity implements SuperRecyclerView.LoadingListener, FloatingSearchView.OnSearchListener {
     private List<EntityDataMap> entityDataMaps;
     private List<Entity_Project> entityProjects;
 
@@ -66,14 +79,79 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
     private Adapter_List adapter_list;
     private int menu_type = 0;
     private IBaseDao<Entity_Project> userDAO;
+
+    private FloatingSearchView searchView;
+    private String currentQuery;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
         ButterKnife.bind(this);
+
+        searchView = (FloatingSearchView) findViewById(R.id.floating_search_view);
+        searchView.setOnSearchListener(this);
         initSuperView();
         initTintBar();
         initSQL();
+    }
+
+
+    SearchBean.SearchDataBean searchDataBean;
+
+    private void onSearch(String currentQuery) {
+        OkGo.get("http://p.codekk.com/api/op/search?text=" + currentQuery + "&page=1")
+                .tag(this)
+                .cacheKey("cacheKey")
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(String s, Call call, Response response) {
+
+                        List<Entity_Project> entity_projects = new ArrayList<Entity_Project>();
+                        try {
+                            JSONObject object = new JSONObject(s).getJSONObject("data");
+                            JSONArray array = object.getJSONArray("projectArray");
+
+                            for (int i = 0; i < array.length(); i++) {
+                                Entity_Project entity_project = new Gson().fromJson(array.getJSONObject(i).toString(), Entity_Project.class);
+                                entity_projects.add(entity_project);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+
+                        adapter_project = new Adapter_Project(ListActivity.this, entity_projects);
+                        re_list_activity.setAdapter(adapter_project);
+                        adapter_project.setOnItemClickListener(new SuperBaseAdapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, Object item, int position) {
+                                Intent intent = new Intent(ListActivity.this, DetailActivity.class);
+                                intent.putExtra("project", (Parcelable) item);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAfter(String s, Exception e) {
+                        re_list_activity.setRefreshing(false);
+                        super.onAfter(s, e);
+                    }
+                });
+
+
+
+    }
+
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
     }
 
     @OnClick(R.id.menu)
@@ -100,20 +178,24 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
                 switch (position) {
                     case 0:
                         menu_type = 0;
+                        re_list_activity.setRefreshing(true);
                         break;
                     case 1:
                         menu_type = 1;
                         //queryAll();
-
+                        re_list_activity.setRefreshing(true);
                         break;
                     case 2:
                         menu_type = 2;
+                        searchView.setVisibility(View.VISIBLE);
                         break;
                     case 3:
                         menu_type = 3;
                         break;
                 }
-                re_list_activity.setRefreshing(true);
+                if (searchView.getVisibility() == View.VISIBLE && menu_type != 2) {
+                    searchView.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -146,9 +228,12 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
     /**
      * 查询数据库所有数据
      */
+    Adapter_Project adapter_project;
+
     private void queryAll() {
+
         List<Entity_Project> entity_projects = userDAO.queryAll();
-        Adapter_Project adapter_project = new Adapter_Project(ListActivity.this, entity_projects);
+        adapter_project = new Adapter_Project(ListActivity.this, entity_projects);
         adapter_project.setIs_like_type(1);
         adapter_project.setOnItemClickListener(new SuperBaseAdapter.OnItemClickListener() {
             @Override
@@ -173,7 +258,7 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
         }
         SystemBarTintManager tintManager = new SystemBarTintManager(this);
         tintManager.setStatusBarTintEnabled(true);
-        tintManager.setTintColor(Color.parseColor("#C23C3C"));//通知栏所需颜色
+        tintManager.setTintColor(Color.parseColor("#702f64"));//通知栏所需颜色
 
     }
 
@@ -214,13 +299,21 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
         switch (menu_type) {
             case 0:
                 if (entityDataMaps != null) {
+                    entityDataMaps.clear();
                     entityDataMaps = null;
                 }
                 if (entityProjects != null) {
+                    entityProjects.clear();
                     entityProjects = null;
                 }
                 entityDataMaps = new ArrayList<>();
                 entityProjects = new ArrayList<>();
+
+                if (adapter_project != null && adapter_project.mData != null && adapter_project.mData.size() != 0) {
+                    Log.i(TAG, "onRefresh: " + adapter_project.mData.size());
+                    adapter_project.mData.clear();
+                    adapter_project.notifyDataSetChanged();
+                }
                 loadFirstNETData();
 
                 break;
@@ -228,6 +321,7 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
                 queryAll();
                 break;
             case 2:
+                onSearch(currentQuery);
                 break;
             case 3:
                 break;
@@ -251,6 +345,12 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
                         progressDialog.show();
                         // UI线程 请求网络之前调用
                         // 可以显示对话框，添加/修改/移除 请求参数
+                        if (getNetStateIsNo()) {
+                            showToast("没有网络！");
+                            //  return;
+                        }
+
+
                     }
 
                     @Override
@@ -290,11 +390,16 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
                         //  progressDialog.show();
                         // UI线程 请求网络之前调用
                         // 可以显示对话框，添加/修改/移除 请求参数
+                        if (getNetStateIsNo()) {
+                            showToast("没有网络！");
+                            //    return;
+                        }
                     }
 
                     @Override
                     public void onAfter(@Nullable String s, @Nullable Exception e) {
                         progressDialog.dismiss();
+
                         re_list_activity.completeRefresh();
                     }
 
@@ -320,8 +425,27 @@ public class ListActivity extends AppCompatActivity implements SuperRecyclerView
     public void onLoadMore() {
         if (menu_type != 0) {
             re_list_activity.completeLoadMore();
-          return;
+            return;
         }
         loadNEXTNETData();
+    }
+
+
+    @Override
+    public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
+
+    }
+
+    @Override
+    public void onSearchAction(String currentQuery) {
+        if (getNetStateIsNo()) {
+            showToast("没有网络！");
+            return;
+        }
+        this.currentQuery = currentQuery;
+        onSearch(currentQuery);
+        searchView.setVisibility(View.GONE);
+
+        Log.i(TAG, "onSearchAction: " + currentQuery);
     }
 }

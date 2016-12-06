@@ -49,4 +49,5 @@ dependencies {
     //流式布局
     compile files('libs/MySQLiteUtils.jar')
     compile 'me.wangyuwei:FlipShare:1.0.2'
+    compile 'com.github.arimorty:floatingsearchview:2.0.3'
 }

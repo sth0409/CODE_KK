@@ -18,6 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.sqliteutil.DaoFactory;
@@ -26,9 +27,11 @@ import com.example.sqliteutil.IBaseDao;
 import com.example.sth0409.code_kk.Entity.Entity_Project;
 
 import com.example.sth0409.code_kk.Entity.TagsBean;
+import com.example.sth0409.code_kk.MyAcitivity;
 import com.example.sth0409.code_kk.R;
 import com.example.sth0409.code_kk.TagCloud.TagCloudView;
 import com.example.sth0409.code_kk.Util.MyUtils;
+import com.example.sth0409.code_kk.Util.NetStareUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,15 +46,15 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 
-public class DetailActivity extends AppCompatActivity implements TagCloudView.OnTagClickListener {
+public class DetailActivity extends MyAcitivity implements TagCloudView.OnTagClickListener {
 
 
-    String result;
-    String Url = "";
-    String title;
-    String p_url;
-    String p_doc;
-    List<String> tags = new ArrayList<>();
+    private String result;
+    private String Url = "";
+    private String title;
+    private String p_url;
+    private String p_doc;
+    private List<String> tags = new ArrayList<>();
     @BindView(R.id.tv_d_title)
     TextView tvDTitle;
     @BindView(R.id.tv_d_project_url)
@@ -68,21 +71,25 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
     NestedScrollView bottomSheet;
     @BindView(R.id.coord1)
     CoordinatorLayout coord1;
-    String TAG = "DetailActivity";
-    List<TagsBean> tagsBeens;
     @BindView(R.id.iv_islike)
     ImageView ivIslike;
-    Entity_Project entity_project;
+    String TAG = "DetailActivity";
+    private List<TagsBean> tagsBeens;
+    private Entity_Project entity_project;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activuty_d);
         ButterKnife.bind(this);
-
         Intent intent = getIntent();
         entity_project = intent.getParcelableExtra("project");
         initSQL();
+        initUrlData();
+        RxJavaLoadData();
+    }
+
+    private void initUrlData() {
         tagsBeens = new ArrayList<>();
         Url = entity_project.getCodeKKUrl();
         title = entity_project.getProjectName();
@@ -90,25 +97,12 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         p_doc = entity_project.getDesc();
         tagsBeens = entity_project.getTags();
         Log.i(TAG, "onCreate: " + p_doc);
+    }
 
-        /**
-         *  Observable.create(new Observable.OnSubscribe<Boolean>() {
-        @Override public void call(Subscriber<? super Boolean> subscriber) {
-        //异步操作相关代码
-        subscriber.onNext(islike = querySQL(entity_project));
-        }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-         .subscribe(new Action1<Boolean>(){
-        @Override public void call(Boolean data) {
-        if (data) {
-        Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
-        }
-        // 主线程操作
-        }
-        });
-
-         */
-
+    /**
+     * 异步加载数据
+     */
+    private void RxJavaLoadData() {
         Observable.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(Subscriber<? super String> subscriber) {
@@ -129,8 +123,6 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
                 webContent.loadDataWithBaseURL(null, s, "text/html", "utf-8", null);
             }
         });
-
-
     }
 
     /**
@@ -151,14 +143,11 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
      * 插入一条信息
      */
     private void insertSQL(Entity_Project entity_project) {
-//        Entity_Project sqLite_project = new Entity_Project();
-//        sqLite_project.setProjectName("test");
-//        sqLite_project.set_id("123456");
         userDAO.insert(entity_project);
     }
 
     private void delSQL(Entity_Project del_entity_project) {
-        setResult(999,new Intent().putExtra("haveDel",0));
+        setResult(999, new Intent().putExtra("haveDel", 0));
         userDAO.delete("user_projectName=?", del_entity_project.getProjectName());
     }
 
@@ -175,8 +164,6 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
     }
 
     /**
-     * if (item.isLike()){
-     * Glide.with(context).load(R.drawable.dolike).into((ImageView) holder.getView(R.id.iv_islike));
      * }
      *
      * @param actionBar
@@ -187,12 +174,12 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setDisplayUseLogoEnabled(false);
         getSupportActionBar().setTitle(actionBar);
-
         getSupportActionBar().setElevation(0);
     }
 
     private void initBottomSheet() {
         final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
+
 
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -204,29 +191,30 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 //这里是拖拽中的回调，根据slideOffset可以做一些动画
-                Log.i("------", "onSlide: " + slideOffset + "---" + behavior.getPeekHeight());
+                if (!getNetStateIsNo()) {
+                    Log.i("------", "onSlide: " + slideOffset + "---" + behavior.getPeekHeight());
+                    if (slideOffset > 0.8) {
+                        tvContentHand.setVisibility(View.GONE);
+                    }
+                    if (slideOffset < 0.2) {
 
-
-                if (slideOffset > 0.8) {
-
-
-                    tvContentHand.setVisibility(View.GONE);
+                        tvContentHand.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    showToast("没有网络！");
                 }
-                if (slideOffset < 0.2) {
 
-                    tvContentHand.setVisibility(View.VISIBLE);
-                }
+
             }
         });
     }
 
-    boolean islike;
+    private boolean islike;
 
     private void initWeiget() {
         tvDTitle.setText(title);
         tvDProjectUrl.setText(p_url);
         tvDProjectDoc.setText(p_doc);
-        //  checkIsLike();
         checkIsLikebyRxJava();
     }
 
@@ -251,22 +239,6 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
 
     }
 
-    private void checkIsLike() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                islike = querySQL(entity_project);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (islike) {
-                            Glide.with(DetailActivity.this).load(R.drawable.dolike).into(ivIslike);
-                        }
-                    }
-                });
-            }
-        }).start();
-    }
 
     private void initTagView() {
         if (tagsBeens == null) {
@@ -276,9 +248,7 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
             tags.add(tagsBeens.get(i).getName());
             Log.i("----", "initTagView: " + tagsBeens.get(i).getName());
         }
-
         tagCloudView.setTags(tags);
-
         tagCloudView.setOnTagClickListener(this);
     }
 
@@ -322,6 +292,12 @@ public class DetailActivity extends AppCompatActivity implements TagCloudView.On
                         .setPositiveButton("是", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                if (getNetStateIsNo()) {
+                                    Toast.makeText(DetailActivity.this, "没有网络！", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+
                                 Uri uri = Uri.parse(p_url);
                                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                 startActivity(intent);

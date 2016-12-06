@@ -28,6 +28,10 @@ public class Adapter_Project extends SuperBaseAdapter<Entity_Project> {
 
     private int is_like_type;
 
+
+
+
+
     public Adapter_Project(Context context) {
 
         super(context);
@@ -38,6 +42,9 @@ public class Adapter_Project extends SuperBaseAdapter<Entity_Project> {
         super(context, data);
         this.context = context;
     }
+
+
+
 
     @Override
     protected void convert(BaseViewHolder holder, Entity_Project item, int position) {

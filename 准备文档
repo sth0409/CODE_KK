@@ -42,3 +42,6 @@ Referer: http://r.codekk.com/
 Cookie: Hm_lvt_8f550dd0576b7724ecada0a7be2d12df=1476944193,1477979988,1478056925,1479125868; _ga=GA1.2.64620304.1476145786; Hm_lpvt_8f550dd0576b7724ecada0a7be2d12df=1479127714; _gat=1
 Connection: keep-alive
 Upgrade-Insecure-Requests: 1
+
+
+加入网络状态判断

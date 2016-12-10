@@ -1,6 +1,8 @@
 package com.example.sth0409.code_kk.Ui;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,24 +14,34 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
+import com.dou361.dialogui.DialogUIUtils;
 import com.example.sqliteutil.DaoFactory;
 import com.example.sqliteutil.DbSqlite;
 import com.example.sqliteutil.IBaseDao;
 import com.example.sth0409.code_kk.Adapter.Adapter_List;
+import com.example.sth0409.code_kk.Adapter.Adapter_One;
 import com.example.sth0409.code_kk.Adapter.Adapter_Project;
 import com.example.sth0409.code_kk.Config.Configer;
 import com.example.sth0409.code_kk.Entity.EntityDataMap;
 import com.example.sth0409.code_kk.Entity.Entity_Project;
+import com.example.sth0409.code_kk.Entity.OneHpBean;
 import com.example.sth0409.code_kk.MyAcitivity;
 import com.example.sth0409.code_kk.R;
+import com.example.sth0409.code_kk.Util.DensityUtil;
+import com.example.sth0409.code_kk.Util.DialogUtil;
 import com.example.sth0409.code_kk.Util.MyUtils;
 import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
@@ -46,6 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -62,8 +75,7 @@ import okhttp3.Response;
 public class ListActivity extends MyAcitivity implements SuperRecyclerView.LoadingListener, FloatingSearchView.OnSearchListener {
     private List<EntityDataMap> entityDataMaps;
     private List<Entity_Project> entityProjects;
-
-    private ProgressDialog progressDialog;
+    private Dialog loadingDialog;
     @BindView(R.id.re_list_activity)
     SuperRecyclerView re_list_activity;
     @BindView(R.id.menu)
@@ -72,17 +84,20 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
     private Adapter_List adapter_list;
     private int menu_type = 0;
     private IBaseDao<Entity_Project> userDAO;
-
+    private IBaseDao<OneHpBean> oneDAO;
     private FloatingSearchView searchView;
     private String currentQuery;
-
+    private Context mContext;
+    private Activity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-
+        mContext = mActivity = this;
         ButterKnife.bind(this);
+
+        getYearAndMonth();
 
         searchView = (FloatingSearchView) findViewById(R.id.floating_search_view);
         searchView.setOnSearchListener(this);
@@ -104,6 +119,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
         initTintBar();
         initSQL();
     }
+
     private void onSearch(String currentQuery) {
         OkGo.get(Configer.URL_GETSEARCHDATA(currentQuery))
                 .tag(this)
@@ -116,6 +132,11 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                         try {
                             JSONObject object = new JSONObject(s).getJSONObject("data");
                             JSONArray array = object.getJSONArray("projectArray");
+
+                            if (array.length() == 0) {
+                                DialogUtil.showCenterCustomDialog(mActivity, R.layout.dialog_layout, 150, 150);
+                            }
+
 
                             for (int i = 0; i < array.length(); i++) {
                                 Entity_Project entity_project = new Gson().fromJson(array.getJSONObject(i).toString(), Entity_Project.class);
@@ -142,7 +163,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
                     @Override
                     public void onAfter(String s, Exception e) {
-                        progressDialog.dismiss();
+                        //     progressDialog.dismiss();
+                        loadingDialog.dismiss();
                         re_list_activity.completeRefresh();
                         super.onAfter(s, e);
                     }
@@ -192,6 +214,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                         break;
                     case 3:
                         menu_type = 3;
+                        re_list_activity.setRefreshing(true);
                         break;
                 }
                 if (searchView.getVisibility() == View.VISIBLE && menu_type != 2) {
@@ -211,9 +234,13 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
      */
     private void initSQL() {
         SQLiteDatabase db = this.openOrCreateDatabase("mylikeproject.db", Context.MODE_PRIVATE, null);
+        SQLiteDatabase db_one = this.openOrCreateDatabase("onehot.db", Context.MODE_PRIVATE, null);
         DbSqlite dbSqlite = new DbSqlite(this, db);
+        DbSqlite dbSqlite_one = new DbSqlite(this, db_one);
         userDAO = DaoFactory.createGenericDao(dbSqlite, Entity_Project.class);
         userDAO.createTable();
+        oneDAO = DaoFactory.createGenericDao(dbSqlite_one, OneHpBean.class);
+        oneDAO.createTable();
     }
 
     @Override
@@ -234,6 +261,12 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
     private void queryAll() {
 
         List<Entity_Project> entity_projects = userDAO.queryAll();
+        if (entity_projects == null || entity_projects.size() == 0) {
+            DialogUtil.showCenterCustomDialog(mActivity, R.layout.dialog_layout, 150, 150);
+            loadingDialog.dismiss();
+            re_list_activity.completeRefresh();
+            return;
+        }
         adapter_project = new Adapter_Project(ListActivity.this, entity_projects);
         adapter_project.setIs_like_type(1);
         adapter_project.setOnItemClickListener(new SuperBaseAdapter.OnItemClickListener() {
@@ -245,7 +278,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
             }
         });
         re_list_activity.setAdapter(adapter_project);
-        progressDialog.dismiss();
+        //     progressDialog.dismiss();
+        loadingDialog.dismiss();
         re_list_activity.completeRefresh();
         for (int i = 0; i < entity_projects.size(); i++) {
             Log.i("-----", "queryAll: " + i + "--" + entity_projects.get(i).getProjectName());
@@ -277,9 +311,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
     }
 
     private void initSuperView() {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        re_list_activity.setLayoutManager(layoutManager);
+
+        re_list_activity.setLayoutManager(new LinearLayoutManager(mContext));
         re_list_activity.setRefreshEnabled(true);//可以定制是否开启下拉刷新
         re_list_activity.setLoadMoreEnabled(true);//可以定制是否开启加载更多
         re_list_activity.setRefreshProgressStyle(ProgressStyle.BallSpinFadeLoader);//可以自定义下拉刷新的样式
@@ -291,12 +324,19 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
     }
 
+    private void setSuperViewLayoutManager() {
+
+
+    }
+
     @Override
     public void onRefresh() {
 
-        progressDialog = new ProgressDialog(ListActivity.this);
-        progressDialog.setTitle("加载中，请稍等");
-        progressDialog.show();
+//        progressDialog = new ProgressDialog(ListActivity.this);
+//        progressDialog.setTitle("加载中，请稍等");
+//        progressDialog.show();
+        loadingDialog = DialogUIUtils.showLoadingVertical(this, "加载中...").show();
+        loadingDialog.show();
         switch (menu_type) {
             case 0:
                 if (entityDataMaps != null) {
@@ -325,10 +365,104 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                 onSearch(currentQuery);
                 break;
             case 3:
+                getOneDataFromNET();
                 break;
         }
 
 
+    }
+
+    int index = 0;
+    int size = 8;
+    private List<OneHpBean> oneHpBeanList;
+    Adapter_One adapter_one;
+
+    private void getOneData() {
+
+//        for (int i1 = 0; i1 <19; i1++) {
+//            strings.add(i1 + "123456789");
+//        }  oneHpBeanList = new ArrayList<>();
+//
+//        adapter_one = new Adapter_One(mContext);
+//        re_list_activity.setAdapter(adapter_one);
+//        adapter_one.mData.addAll(strings);
+//        adapter_one.notifyDataSetChanged();
+//        loadingDialog.dismiss();
+//        re_list_activity.completeRefresh();
+//        oneHpBeanList = new ArrayList<>();
+//        oneHpBeanList = oneDAO.pagingQuery(null, null, index, size);
+//        index = index + oneHpBeanList.size();
+//        if (oneHpBeanList.size() < 8) {
+//            getOneDataFromNET();
+//        }
+
+    }
+
+    public void getYearAndMonth() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(System.currentTimeMillis());
+        year = cal.get(Calendar.YEAR);
+        month = (cal.get(Calendar.MONTH) + 1);
+
+    }
+
+
+    private int year;
+    private int month;
+
+    private void getOneDataFromNET() {
+
+
+        OkGo.get(Configer.URL_ONE_HOT_DATA + 2016 + "-" + 10).tag(this)                       // 请求的 tag, 主要用于取消对应的请求
+                .cacheKey("cacheKey")            // 设置当前请求的缓存key,建议每个不同功能的请求设置一个
+                .execute(new StringCallback() {
+                    @Override
+                    public void onBefore(BaseRequest request) {
+                        //  progressDialog.show();
+                        // UI线程 请求网络之前调用
+                        // 可以显示对话框，添加/修改/移除 请求参数
+                        if (getNetStateIsNo()) {
+                            showToast("没有网络！");
+                            //    return;
+                        }
+                        oneHpBeanList = new ArrayList<>();
+
+                        adapter_one = new Adapter_One(mContext);
+                        re_list_activity.setAdapter(adapter_one);
+                    }
+
+                    @Override
+                    public void onAfter(@Nullable String s, @Nullable Exception e) {
+
+                        loadingDialog.dismiss();
+                        re_list_activity.completeRefresh();
+                    }
+
+                    @Override
+                    public void onSuccess(String s, Call call, Response response) {
+                        // s 即为所需要的结果
+                        //    List<EntityDataMap> dataList=new ArrayList<>();
+
+                        JSONArray array_one = null;
+                        try {
+                            JSONObject object = new JSONObject(s);
+                            array_one = object.getJSONArray("data");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        for (int i = 0; i < array_one.length(); i++) {
+                            OneHpBean oneHpBean = new Gson().fromJson(String.valueOf(array_one.optJSONObject(i)), OneHpBean.class);
+                            oneHpBeanList.add(oneHpBean);
+
+                        }
+
+                        adapter_one.mData.addAll(oneHpBeanList);
+                        adapter_one.notifyDataSetChanged();
+
+
+
+                    }
+                });
     }
 
     /**
@@ -342,8 +476,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                 .execute(new StringCallback() {
                     @Override
                     public void onBefore(BaseRequest request) {
-                        progressDialog.show();
-
+                        //  progressDialog.show();
+                        loadingDialog.show();
                         if (getNetStateIsNo()) {
                             showToast("没有网络！");
                             //  return;
@@ -354,7 +488,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
                     @Override
                     public void onAfter(@Nullable String s, @Nullable Exception e) {
-                        progressDialog.dismiss();
+                        //     progressDialog.dismiss();
+                        loadingDialog.dismiss();
                         re_list_activity.completeLoadMore();
                     }
 
@@ -391,8 +526,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
                     @Override
                     public void onAfter(@Nullable String s, @Nullable Exception e) {
-                        progressDialog.dismiss();
-
+                        //     progressDialog.dismiss();
+                        loadingDialog.dismiss();
                         re_list_activity.completeRefresh();
                     }
 

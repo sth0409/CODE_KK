@@ -41,13 +41,12 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.android.support:cardview-v7:24.2.1'
-    // jsoup HTML parser library @ http://jsoup.org/
-    compile 'org.jsoup:jsoup:1.10.1'
+    compile 'org.jsoup:jsoup:1.10.1'// jsoup HTML parser library @ http://jsoup.org/
     compile 'com.jakewharton:butterknife:8.4.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
-    compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
-    //流式布局
-    compile files('libs/MySQLiteUtils.jar')
-    compile 'me.wangyuwei:FlipShare:1.0.2'
-    compile 'com.github.arimorty:floatingsearchview:2.0.3'
+    compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'//沉浸式
+    compile files('libs/MySQLiteUtils.jar')//数据库工具类 https://github.com/YeDaxia/SQLiteUtils
+    compile 'me.wangyuwei:FlipShare:1.0.2'//展开菜单按钮
+    compile 'com.github.arimorty:floatingsearchview:2.0.3'//搜索框
+    compile 'com.dou361.dialogui:jjdxm-dialogui:1.0.1'//自定义Dialog
 }

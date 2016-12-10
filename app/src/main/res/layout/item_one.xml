@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/item_one_cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    app:cardCornerRadius="3dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/item_one_iv"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:background="#124956" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="22dp"
+                android:gravity="right|center_vertical"
+                android:paddingRight="10dp"
+                android:text="2016-12-10"
+                android:textSize="17sp"
+                android:id="@+id/item_one_tv_time"
+                android:textColor="#fff"
+                android:background="@drawable/back_item_time"
+                android:layout_gravity="bottom"/>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/item_one_tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="15dp"
+            android:lines="3" />
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

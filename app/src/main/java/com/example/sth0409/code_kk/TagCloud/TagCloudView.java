@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * Created by NeXT on 15-7-29.
+ * 标签View
  */
 public class TagCloudView extends ViewGroup{
 

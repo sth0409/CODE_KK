@@ -24,14 +24,14 @@ public class GApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        //---------这里给出的是示例代码,告诉你可以这么传,实际使用的时候,根据需要传,不需要就不传-------------//
-        HttpHeaders headers = new HttpHeaders();
-        headers.put("commonHeaderKey1", "commonHeaderValue1");    //header不支持中文
-        headers.put("commonHeaderKey2", "commonHeaderValue2");
-        HttpParams params = new HttpParams();
-        params.put("commonParamsKey1", "commonParamsValue1");     //param支持中文,直接传,不要自己编码
-        params.put("commonParamsKey2", "这里支持中文参数");
-        //-----------------------------------------------------------------------------------//
+//        //---------这里给出的是示例代码,告诉你可以这么传,实际使用的时候,根据需要传,不需要就不传-------------//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.put("commonHeaderKey1", "commonHeaderValue1");    //header不支持中文
+//        headers.put("commonHeaderKey2", "commonHeaderValue2");
+//        HttpParams params = new HttpParams();
+//        params.put("commonParamsKey1", "commonParamsValue1");     //param支持中文,直接传,不要自己编码
+//        params.put("commonParamsKey2", "这里支持中文参数");
+//        //-----------------------------------------------------------------------------------//
 
         //必须调用初始化
         OkGo.init(this);
@@ -61,7 +61,7 @@ public class GApp extends Application {
 
                     //如果不想让框架管理cookie,以下不需要
 //                .setCookieStore(new MemoryCookieStore())                //cookie使用内存缓存（app退出后，cookie消失）
-                    .setCookieStore(new PersistentCookieStore())          //cookie持久化存储，如果cookie不过期，则一直有效
+                    .setCookieStore(new PersistentCookieStore());          //cookie持久化存储，如果cookie不过期，则一直有效
 
                     //可以设置https的证书,以下几种方案根据需要自己设置
 //                    .setCertificates()                                  //方法一：信任所有证书（选一种即可）
@@ -76,9 +76,9 @@ public class GApp extends Application {
 //                    }
 //                })
 
-                    //这两行同上,不需要就不要传
-                    .addCommonHeaders(headers)                                         //设置全局公共头
-                    .addCommonParams(params);                                          //设置全局公共参数
+//                    //这两行同上,不需要就不要传
+//                    .addCommonHeaders(headers)                                         //设置全局公共头
+//                    .addCommonParams(params);                                          //设置全局公共参数
         } catch (Exception e) {
             e.printStackTrace();
         }

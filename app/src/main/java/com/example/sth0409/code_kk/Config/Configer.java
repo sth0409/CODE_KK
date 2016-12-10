@@ -22,6 +22,7 @@ public class Configer {
 
     /***
      * 搜索功能
+     *
      * @param searchMessage 搜索的信息
      * @return
      */
@@ -30,7 +31,7 @@ public class Configer {
     }
 
     /***
-     * 每日推荐
+     * ONE一个 接口 追加月份
      */
-    public static final String URL_RECOMMENDDATA="http://r.codekk.com/r/type/android";
+    public static final String URL_ONE_HOT_DATA = "http://v3.wufazhuce.com:8000/api/hp/bymonth/";
 }

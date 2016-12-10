@@ -164,7 +164,7 @@ public class DetailActivity extends MyAcitivity implements TagCloudView.OnTagCli
     }
 
     /**
-     * }
+     * }UNIQUE constraint failed
      *
      * @param actionBar
      */

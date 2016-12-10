@@ -44,6 +44,7 @@ import com.example.sth0409.code_kk.Util.DensityUtil;
 import com.example.sth0409.code_kk.Util.DialogUtil;
 import com.example.sth0409.code_kk.Util.MyUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.request.BaseRequest;
@@ -96,19 +97,14 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
         setContentView(R.layout.activity_list);
         mContext = mActivity = this;
         ButterKnife.bind(this);
-
-        getYearAndMonth();
-
         searchView = (FloatingSearchView) findViewById(R.id.floating_search_view);
         searchView.setOnSearchListener(this);
-
         searchView.setDismissOnOutsideClick(true);
         searchView.setOnFocusChangeListener(new FloatingSearchView.OnFocusChangeListener() {
             @Override
             public void onFocus() {
 
             }
-
             @Override
             public void onFocusCleared() {
                 searchView.setVisibility(View.GONE);
@@ -127,27 +123,20 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(String s, Call call, Response response) {
-
                         List<Entity_Project> entity_projects = new ArrayList<Entity_Project>();
                         try {
                             JSONObject object = new JSONObject(s).getJSONObject("data");
                             JSONArray array = object.getJSONArray("projectArray");
-
                             if (array.length() == 0) {
                                 DialogUtil.showCenterCustomDialog(mActivity, R.layout.dialog_layout, 150, 150);
                             }
-
-
                             for (int i = 0; i < array.length(); i++) {
                                 Entity_Project entity_project = new Gson().fromJson(array.getJSONObject(i).toString(), Entity_Project.class);
                                 entity_projects.add(entity_project);
                             }
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
-
                         adapter_project = new Adapter_Project(ListActivity.this, entity_projects);
                         adapter_project.setIs_like_type(2);
                         re_list_activity.setAdapter(adapter_project);
@@ -169,14 +158,11 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                         super.onAfter(s, e);
                     }
                 });
-
-
     }
 
 
     @Override
     protected void onDestroy() {
-
         super.onDestroy();
     }
 
@@ -190,7 +176,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                 .addItem(new ShareItem("主页", Color.WHITE, 0xff43549C, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_home)))
                 .addItem(new ShareItem("收藏", Color.WHITE, 0xff4999F0, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_like)))
                 .addItem(new ShareItem("搜索", Color.WHITE, 0xffD9392D, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_search)))
-                .addItem(new ShareItem("日推", Color.WHITE, 0xffD9392D, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_tui)))
+                .addItem(new ShareItem("图文", Color.WHITE, 0xff506888, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_tui)))
                 .setBackgroundColor(0x60000000)
                 .setSeparateLineColor(0x30000000)
                 .create();
@@ -204,7 +190,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                         break;
                     case 1:
                         menu_type = 1;
-                        //queryAll();
                         re_list_activity.setRefreshing(true);
                         break;
                     case 2:
@@ -259,7 +244,10 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
     Adapter_Project adapter_project;
 
     private void queryAll() {
-
+        if (adapter_project != null && adapter_project.mData != null) {
+            adapter_project.mData.clear();
+            adapter_project.notifyDataSetChanged();
+        }
         List<Entity_Project> entity_projects = userDAO.queryAll();
         if (entity_projects == null || entity_projects.size() == 0) {
             DialogUtil.showCenterCustomDialog(mActivity, R.layout.dialog_layout, 150, 150);
@@ -278,7 +266,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
             }
         });
         re_list_activity.setAdapter(adapter_project);
-        //     progressDialog.dismiss();
         loadingDialog.dismiss();
         re_list_activity.completeRefresh();
         for (int i = 0; i < entity_projects.size(); i++) {
@@ -294,7 +281,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
         SystemBarTintManager tintManager = new SystemBarTintManager(this);
         tintManager.setStatusBarTintEnabled(true);
         tintManager.setTintColor(Color.parseColor("#702f64"));//通知栏所需颜色
-
     }
 
     @TargetApi(19)
@@ -324,17 +310,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
     }
 
-    private void setSuperViewLayoutManager() {
-
-
-    }
-
     @Override
     public void onRefresh() {
-
-//        progressDialog = new ProgressDialog(ListActivity.this);
-//        progressDialog.setTitle("加载中，请稍等");
-//        progressDialog.show();
         loadingDialog = DialogUIUtils.showLoadingVertical(this, "加载中...").show();
         loadingDialog.show();
         switch (menu_type) {
@@ -365,6 +342,10 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                 onSearch(currentQuery);
                 break;
             case 3:
+                getYearAndMonth();
+                oneHpBeanList = new ArrayList<>();
+                adapter_one = new Adapter_One(mContext);
+                re_list_activity.setAdapter(adapter_one);
                 getOneDataFromNET();
                 break;
         }
@@ -372,31 +353,10 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
     }
 
-    int index = 0;
-    int size = 8;
+
     private List<OneHpBean> oneHpBeanList;
     Adapter_One adapter_one;
 
-    private void getOneData() {
-
-//        for (int i1 = 0; i1 <19; i1++) {
-//            strings.add(i1 + "123456789");
-//        }  oneHpBeanList = new ArrayList<>();
-//
-//        adapter_one = new Adapter_One(mContext);
-//        re_list_activity.setAdapter(adapter_one);
-//        adapter_one.mData.addAll(strings);
-//        adapter_one.notifyDataSetChanged();
-//        loadingDialog.dismiss();
-//        re_list_activity.completeRefresh();
-//        oneHpBeanList = new ArrayList<>();
-//        oneHpBeanList = oneDAO.pagingQuery(null, null, index, size);
-//        index = index + oneHpBeanList.size();
-//        if (oneHpBeanList.size() < 8) {
-//            getOneDataFromNET();
-//        }
-
-    }
 
     public void getYearAndMonth() {
         Calendar cal = Calendar.getInstance();
@@ -413,7 +373,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
     private void getOneDataFromNET() {
 
 
-        OkGo.get(Configer.URL_ONE_HOT_DATA + 2016 + "-" + 10).tag(this)                       // 请求的 tag, 主要用于取消对应的请求
+        OkGo.get(Configer.URL_ONE_HOT_DATA + year + "-" + month).tag(this)                       // 请求的 tag, 主要用于取消对应的请求
                 .cacheKey("cacheKey")            // 设置当前请求的缓存key,建议每个不同功能的请求设置一个
                 .execute(new StringCallback() {
                     @Override
@@ -425,10 +385,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                             showToast("没有网络！");
                             //    return;
                         }
-                        oneHpBeanList = new ArrayList<>();
 
-                        adapter_one = new Adapter_One(mContext);
-                        re_list_activity.setAdapter(adapter_one);
                     }
 
                     @Override
@@ -440,9 +397,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
                     @Override
                     public void onSuccess(String s, Call call, Response response) {
-                        // s 即为所需要的结果
-                        //    List<EntityDataMap> dataList=new ArrayList<>();
-
                         JSONArray array_one = null;
                         try {
                             JSONObject object = new JSONObject(s);
@@ -450,15 +404,24 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        for (int i = 0; i < array_one.length(); i++) {
-                            OneHpBean oneHpBean = new Gson().fromJson(String.valueOf(array_one.optJSONObject(i)), OneHpBean.class);
-                            oneHpBeanList.add(oneHpBean);
+                        try {
+                            for (int i = 0; i < array_one.length(); i++) {
+                                OneHpBean oneHpBean = new Gson().fromJson(String.valueOf(array_one.optJSONObject(i)), OneHpBean.class);
+                                oneHpBeanList.add(oneHpBean);
 
+                            }
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
                         }
 
-                        adapter_one.mData.addAll(oneHpBeanList);
+                        adapter_one.mData.addAll(adapter_one.mData.size(),oneHpBeanList);
                         adapter_one.notifyDataSetChanged();
 
+                        month--;
+                        if (month == 0) {
+                            year--;
+                            month = 12;
+                        }
 
 
                     }
@@ -545,11 +508,28 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
     @Override
     public void onLoadMore() {
-        if (menu_type != 0) {
+
+
+        if (menu_type == 1 || menu_type == 2) {
             re_list_activity.completeLoadMore();
             return;
         }
-        loadNEXTNETData();
+        switch (menu_type) {
+            case 0:
+                loadNEXTNETData();
+                break;
+            case 1:
+                re_list_activity.completeLoadMore();
+                break;
+            case 2:
+                re_list_activity.completeLoadMore();
+                break;
+            case 3:
+                getOneDataFromNET();
+                break;
+        }
+
+
     }
 
 

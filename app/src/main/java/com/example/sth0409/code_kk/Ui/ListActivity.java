@@ -2,15 +2,11 @@ package com.example.sth0409.code_kk.Ui;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -21,11 +17,9 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
-import com.bumptech.glide.Glide;
 import com.example.sqliteutil.DaoFactory;
 import com.example.sqliteutil.DbSqlite;
 import com.example.sqliteutil.IBaseDao;
@@ -34,7 +28,6 @@ import com.example.sth0409.code_kk.Adapter.Adapter_Project;
 import com.example.sth0409.code_kk.Config.Configer;
 import com.example.sth0409.code_kk.Entity.EntityDataMap;
 import com.example.sth0409.code_kk.Entity.Entity_Project;
-import com.example.sth0409.code_kk.Entity.SearchBean;
 import com.example.sth0409.code_kk.MyAcitivity;
 import com.example.sth0409.code_kk.R;
 import com.example.sth0409.code_kk.Util.MyUtils;
@@ -93,16 +86,26 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
         searchView = (FloatingSearchView) findViewById(R.id.floating_search_view);
         searchView.setOnSearchListener(this);
+
+        searchView.setDismissOnOutsideClick(true);
+        searchView.setOnFocusChangeListener(new FloatingSearchView.OnFocusChangeListener() {
+            @Override
+            public void onFocus() {
+
+            }
+
+            @Override
+            public void onFocusCleared() {
+                searchView.setVisibility(View.GONE);
+            }
+        });
+        searchView.setLeftActionMode(FloatingSearchView.LEFT_ACTION_MODE_SHOW_SEARCH);
         initSuperView();
         initTintBar();
         initSQL();
     }
-
-
-    SearchBean.SearchDataBean searchDataBean;
-
     private void onSearch(String currentQuery) {
-        OkGo.get("http://p.codekk.com/api/op/search?text=" + currentQuery + "&page=1")
+        OkGo.get(Configer.URL_GETSEARCHDATA(currentQuery))
                 .tag(this)
                 .cacheKey("cacheKey")
                 .execute(new StringCallback() {
@@ -125,6 +128,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
 
                         adapter_project = new Adapter_Project(ListActivity.this, entity_projects);
+                        adapter_project.setIs_like_type(2);
                         re_list_activity.setAdapter(adapter_project);
                         adapter_project.setOnItemClickListener(new SuperBaseAdapter.OnItemClickListener() {
                             @Override
@@ -138,11 +142,11 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
                     @Override
                     public void onAfter(String s, Exception e) {
-                        re_list_activity.setRefreshing(false);
+                        progressDialog.dismiss();
+                        re_list_activity.completeRefresh();
                         super.onAfter(s, e);
                     }
                 });
-
 
 
     }
@@ -165,16 +169,12 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                 .addItem(new ShareItem("收藏", Color.WHITE, 0xff4999F0, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_like)))
                 .addItem(new ShareItem("搜索", Color.WHITE, 0xffD9392D, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_search)))
                 .addItem(new ShareItem("日推", Color.WHITE, 0xffD9392D, BitmapFactory.decodeResource(getResources(), R.mipmap.icon_tui)))
-                //    .addItem(new ShareItem("http://www.wangyuwei.me", Color.WHITE, 0xff57708A))
                 .setBackgroundColor(0x60000000)
-                //    .setItemDuration(500)
                 .setSeparateLineColor(0x30000000)
-                // .setAnimType(FlipShareView.TYPE_SLIDE)
                 .create();
         share.setOnFlipClickListener(new FlipShareView.OnFlipClickListener() {
             @Override
             public void onItemClick(int position) {
-                //  Toast.makeText(ListActivity.this, "" + position, Toast.LENGTH_SHORT).show();
                 switch (position) {
                     case 0:
                         menu_type = 0;
@@ -188,6 +188,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                     case 2:
                         menu_type = 2;
                         searchView.setVisibility(View.VISIBLE);
+                        searchView.setSearchFocused(true);
                         break;
                     case 3:
                         menu_type = 3;
@@ -338,13 +339,11 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
         loadmore = Configer.URL_GETMOREDATA(page);
         OkGo.get(loadmore).tag(this)                       // 请求的 tag, 主要用于取消对应的请求
                 .cacheKey("cacheKey")            // 设置当前请求的缓存key,建议每个不同功能的请求设置一个
-                //  .cacheMode(CacheMode.DEFAULT)    // 缓存模式，详细请看缓存介绍
                 .execute(new StringCallback() {
                     @Override
                     public void onBefore(BaseRequest request) {
                         progressDialog.show();
-                        // UI线程 请求网络之前调用
-                        // 可以显示对话框，添加/修改/移除 请求参数
+
                         if (getNetStateIsNo()) {
                             showToast("没有网络！");
                             //  return;
@@ -367,11 +366,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                         entityDataMaps_new = MyUtils.getEntitys(s, entityDataMaps);
                         entityDataMaps.addAll(entityDataMaps.size(), entityDataMaps_new);
                         adapter_list.notifyDataSetChanged();
-//                        EntityDataMap entityDataMap = entityDataMaps.get(0);
-//                        JSONArray jsonArrayProject = entityDataMap.getmArray();
-//                        entityProjects = MyUtils.getProjectList(jsonArrayProject, entityProjects);
-//                        Log.i("--------", "onSuccess: " + entityDataMap.getmDate() + ":" + entityProjects.get(0).getDesc());
-//                        Toast.makeText(ListActivity.this, "onSuccess: " + entityDataMap.getmDate() + ":" + entityProjects.get(0).getDesc(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -383,7 +377,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
     private void loadFirstNETData() {
         OkGo.get(Configer.URL_GETLATESTDATA).tag(this)                       // 请求的 tag, 主要用于取消对应的请求
                 .cacheKey("cacheKey")            // 设置当前请求的缓存key,建议每个不同功能的请求设置一个
-                //  .cacheMode(CacheMode.DEFAULT)    // 缓存模式，详细请看缓存介绍
                 .execute(new StringCallback() {
                     @Override
                     public void onBefore(BaseRequest request) {
@@ -411,12 +404,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                         entityDataMaps = MyUtils.getEntitys(s, entityDataMaps);
                         adapter_list = new Adapter_List(ListActivity.this, entityDataMaps);
                         re_list_activity.setAdapter(adapter_list);
-//                        EntityDataMap entityDataMap = entityDataMaps.get(0);
-//                        JSONArray jsonArrayProject = entityDataMap.getmArray();
-//                        entityProjects = MyUtils.getProjectList(jsonArrayProject, entityProjects);
-//                        Log.i("--------", "onSuccess: " + entityDataMap.getmDate() + ":" + entityProjects.get(0).getDesc());
-//                        Toast.makeText(ListActivity.this, "onSuccess: " + entityDataMap.getmDate() + ":" + entityProjects.get(0).getDesc(), Toast.LENGTH_SHORT).show();
-
                     }
                 });
     }
@@ -444,8 +431,8 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
         }
         this.currentQuery = currentQuery;
         onSearch(currentQuery);
+        searchView.clearSearchFocus();
+        searchView.clearQuery();
         searchView.setVisibility(View.GONE);
-
-        Log.i(TAG, "onSearchAction: " + currentQuery);
     }
 }

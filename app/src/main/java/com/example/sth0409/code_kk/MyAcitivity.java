@@ -11,7 +11,7 @@ import com.example.sth0409.code_kk.Util.NetStareUtils;
  * Created by Administrator on 2016/11/29.
  */
 public class MyAcitivity extends AppCompatActivity {
-    public String TAG = "";
+    public String TAG = "---";
 
     protected boolean getNetStateIsNo() {
         return !(NetStareUtils.isNetworkConnected(this));

@@ -52,6 +52,9 @@ public class Adapter_Project extends SuperBaseAdapter<Entity_Project> {
                 .setText(R.id.tv_item_card_content, item.getDesc());
         if (is_like_type == 1) {
             holder.getView(R.id.iv_like_type).setVisibility(View.VISIBLE);
+        }else if (is_like_type == 2){
+            holder.getView(R.id.iv_like_type).setVisibility(View.VISIBLE);
+            Glide.with(context).load(R.mipmap.icon_se).into((ImageView) holder.getView(R.id.iv_like_type));
         }
     }
 

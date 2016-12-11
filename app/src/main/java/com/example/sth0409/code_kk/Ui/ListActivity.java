@@ -2,6 +2,7 @@ package com.example.sth0409.code_kk.Ui;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -17,6 +19,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -24,9 +27,11 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
+import com.bumptech.glide.Glide;
 import com.dou361.dialogui.DialogUIUtils;
 import com.example.sqliteutil.DaoFactory;
 import com.example.sqliteutil.DbSqlite;
@@ -97,6 +102,15 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
         setContentView(R.layout.activity_list);
         mContext = mActivity = this;
         ButterKnife.bind(this);
+
+
+        initSearchView();
+        initSuperView();
+        initTintBar();
+        initSQL();
+    }
+
+    private void initSearchView() {
         searchView = (FloatingSearchView) findViewById(R.id.floating_search_view);
         searchView.setOnSearchListener(this);
         searchView.setDismissOnOutsideClick(true);
@@ -105,15 +119,13 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
             public void onFocus() {
 
             }
+
             @Override
             public void onFocusCleared() {
                 searchView.setVisibility(View.GONE);
             }
         });
         searchView.setLeftActionMode(FloatingSearchView.LEFT_ACTION_MODE_SHOW_SEARCH);
-        initSuperView();
-        initTintBar();
-        initSQL();
     }
 
     private void onSearch(String currentQuery) {
@@ -343,8 +355,38 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                 break;
             case 3:
                 getYearAndMonth();
-                oneHpBeanList = new ArrayList<>();
                 adapter_one = new Adapter_One(mContext);
+                adapter_one.setOnItemClickListener(new SuperBaseAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, Object item, int position) {
+                        Intent intent = new Intent(mContext, OneDetailActivity.class);
+                        OneHpBean oneHpBean = adapter_one.mData.get(position);
+                        intent.putExtra("one",oneHpBean);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(mActivity).toBundle());
+                        } else {
+                            startActivity(intent);
+                        }
+
+//                        View view1 = LayoutInflater.from(mContext).inflate(R.layout.layout_one_detail, null);
+//                        ImageView imageView = (ImageView) view1.findViewById(R.id.iv_one_detail);
+//                        TextView textView_content = (TextView) view1.findViewById(R.id.tv_one_content);
+//                        TextView textView_author = (TextView) view1.findViewById(R.id.tv_one_author);
+//                        OneHpBean oneHpBean = adapter_one.mData.get(position);
+//                        Typeface typeFace = Typeface.createFromAsset(getAssets(), "fonts/jinglei_ziti.ttf");
+//                        textView_content.setTypeface(typeFace);
+//                        textView_author.setTypeface(typeFace);
+//                        Glide.with(mContext).load(oneHpBean.getHp_img_url()).into(imageView);
+//                        String[] strings = null;
+//                        strings = oneHpBean.getHp_content().split("by");
+//                        if (strings.length == 1) {
+//                            strings = oneHpBean.getHp_content().split("from");
+//                        }
+//                        textView_content.setText(strings[0]);
+//                        textView_author.setText("------" + strings[1]);
+//                        DialogUtil.showCenterCustomDialog(mActivity, view1, 1080, 1920);
+                    }
+                });
                 re_list_activity.setAdapter(adapter_one);
                 getOneDataFromNET();
                 break;
@@ -354,7 +396,6 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
     }
 
 
-    private List<OneHpBean> oneHpBeanList;
     Adapter_One adapter_one;
 
 
@@ -397,6 +438,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
 
                     @Override
                     public void onSuccess(String s, Call call, Response response) {
+                        List<OneHpBean> oneHpBeanList = new ArrayList<OneHpBean>();
                         JSONArray array_one = null;
                         try {
                             JSONObject object = new JSONObject(s);
@@ -414,7 +456,7 @@ public class ListActivity extends MyAcitivity implements SuperRecyclerView.Loadi
                             e.printStackTrace();
                         }
 
-                        adapter_one.mData.addAll(adapter_one.mData.size(),oneHpBeanList);
+                        adapter_one.mData.addAll(adapter_one.mData.size(), oneHpBeanList);
                         adapter_one.notifyDataSetChanged();
 
                         month--;

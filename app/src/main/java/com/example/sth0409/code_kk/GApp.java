@@ -9,30 +9,11 @@ import com.lzy.okgo.cookie.store.PersistentCookieStore;
 import com.lzy.okgo.model.HttpHeaders;
 import com.lzy.okgo.model.HttpParams;
 
-/**
- * ================================================
- * 作    者：廖子尧   github 地址  https://github.com/jeasonlzy0216/
- * 版    本：1.0
- * 创建日期：2015/9/23
- * 描    述：
- * 修订历史：
- * ================================================
- */
 public class GApp extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-//        //---------这里给出的是示例代码,告诉你可以这么传,实际使用的时候,根据需要传,不需要就不传-------------//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.put("commonHeaderKey1", "commonHeaderValue1");    //header不支持中文
-//        headers.put("commonHeaderKey2", "commonHeaderValue2");
-//        HttpParams params = new HttpParams();
-//        params.put("commonParamsKey1", "commonParamsValue1");     //param支持中文,直接传,不要自己编码
-//        params.put("commonParamsKey2", "这里支持中文参数");
-//        //-----------------------------------------------------------------------------------//
-
         //必须调用初始化
         OkGo.init(this);
 
@@ -54,31 +35,9 @@ public class GApp extends Application {
                     .setCacheMode(CacheMode.FIRST_CACHE_THEN_REQUEST)
 
                     //可以全局统一设置缓存时间,默认永不过期,具体使用方法看 github 介绍
-                    .setCacheTime(CacheEntity.CACHE_NEVER_EXPIRE)
+                    .setCacheTime(CacheEntity.CACHE_NEVER_EXPIRE);
 
-                    //可以全局统一设置超时重连次数,默认为三次,那么最差的情况会请求4次(一次原始请求,三次重连请求),不需要可以设置为0
-                 //   .setRetryCount(3)
 
-                    //如果不想让框架管理cookie,以下不需要
-//                .setCookieStore(new MemoryCookieStore())                //cookie使用内存缓存（app退出后，cookie消失）
-                    .setCookieStore(new PersistentCookieStore());          //cookie持久化存储，如果cookie不过期，则一直有效
-
-                    //可以设置https的证书,以下几种方案根据需要自己设置
-//                    .setCertificates()                                  //方法一：信任所有证书（选一种即可）
-//                    .setCertificates(getAssets().open("srca.cer"))      //方法二：也可以自己设置https证书（选一种即可）
-//                    .setCertificates(getAssets().open("aaaa.bks"), "123456", getAssets().open("srca.cer"))//方法三：传入bks证书,密码,和cer证书,支持双向加密
-
-                    //可以添加全局拦截器,不会用的千万不要传,错误写法直接导致任何回调不执行
-//                .addInterceptor(new Interceptor() {
-//                    @Override
-//                    public Response intercept(Chain chain) throws IOException {
-//                        return chain.proceed(chain.request());
-//                    }
-//                })
-
-//                    //这两行同上,不需要就不要传
-//                    .addCommonHeaders(headers)                                         //设置全局公共头
-//                    .addCommonParams(params);                                          //设置全局公共参数
         } catch (Exception e) {
             e.printStackTrace();
         }

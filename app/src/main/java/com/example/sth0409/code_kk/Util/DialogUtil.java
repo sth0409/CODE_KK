@@ -18,20 +18,33 @@ import com.example.sth0409.code_kk.R;
 public class DialogUtil {
     /**
      * 在屏幕中心显示一个自定义view的Dialog
-     * @param activity 坐在的Activity
-     * @param contentView  自定义布局文件  最外层布局为R
-     * @param width 布局宽度 dp值
-     * @param height 布局高度 dp值
+     *
+     * @param activity    坐在的Activity
+     * @param contentView 自定义布局文件  最外层布局为R
+     * @param width       布局宽度 dp值
+     * @param height      布局高度 dp值
      */
-    public static void showCenterCustomDialog(Activity activity, int contentView, int width, int height){
+    public static void showCenterCustomDialog(Activity activity, int contentView, int width, int height) {
         View view = activity.getLayoutInflater().inflate(contentView, null);
         Dialog dialog = DialogUIUtils.showCustomAlert(activity, view, Gravity.CENTER).show();
         DialogUIUtils.dismiss();
         dialog.show();
         WindowManager.LayoutParams params =
                 dialog.getWindow().getAttributes();
-        params.width = DensityUtil.dip2px(activity,width);
-        params.height = DensityUtil.dip2px(activity,height);
+        params.width = DensityUtil.dip2px(activity, width);
+        params.height = DensityUtil.dip2px(activity, height);
+        dialog.getWindow().setAttributes(params);
+    }
+
+    public static void showCenterCustomDialog(Activity activity, View contentView, int width_px, int height_px) {
+
+        Dialog dialog = DialogUIUtils.showCustomAlert(activity, contentView, Gravity.CENTER).show();
+        DialogUIUtils.dismiss();
+        dialog.show();
+        WindowManager.LayoutParams params =
+                dialog.getWindow().getAttributes();
+        params.width = width_px;
+        params.height = height_px;
         dialog.getWindow().setAttributes(params);
     }
 

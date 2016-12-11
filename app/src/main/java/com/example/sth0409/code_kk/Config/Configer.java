@@ -1,5 +1,7 @@
 package com.example.sth0409.code_kk.Config;
 
+import android.os.Environment;
+
 /**
  * Created by STH0409 on 2016/11/15.
  */
@@ -34,4 +36,7 @@ public class Configer {
      * ONE一个 接口 追加月份
      */
     public static final String URL_ONE_HOT_DATA = "http://v3.wufazhuce.com:8000/api/hp/bymonth/";
+    public final static String ALBUM_PATH
+            = Environment.getExternalStorageDirectory() + "/ONE_PIC/";
+
 }

@@ -46,7 +46,7 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 
-public class DetailActivity extends MyAcitivity implements TagCloudView.OnTagClickListener {
+public class DetailActivity extends MyAcitivity  {
 
 
     private String result;
@@ -110,7 +110,9 @@ public class DetailActivity extends MyAcitivity implements TagCloudView.OnTagCli
                 subscriber.onNext(result);
                 subscriber.onCompleted();
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<String>() {
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<String>() {
 
             @Override
             public void call(String s) {
@@ -249,7 +251,6 @@ public class DetailActivity extends MyAcitivity implements TagCloudView.OnTagCli
             Log.i("----", "initTagView: " + tagsBeens.get(i).getName());
         }
         tagCloudView.setTags(tags);
-        tagCloudView.setOnTagClickListener(this);
     }
 
     private void initWebView() {
@@ -268,18 +269,6 @@ public class DetailActivity extends MyAcitivity implements TagCloudView.OnTagCli
         */
         ws.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
 
-    }
-
-
-    @Override
-    public void onTagClick(int position) {
-        if (position == -1) {
-//            Toast.makeText(getApplicationContext(), "点击末尾文字",
-//                    Toast.LENGTH_SHORT).show();
-        } else {
-//            Toast.makeText(getApplicationContext(), "点击 position : " + position,
-//                    Toast.LENGTH_SHORT).show();
-        }
     }
 
     @OnClick({R.id.tv_d_project_url, R.id.iv_islike})

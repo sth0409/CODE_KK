@@ -26,9 +26,12 @@ http://fir.im/jzr5
 项目页面 链接可点击 通过浏览器打开网址
 
 图文界面 长按图片可保存到本地
-
-
-
+gif有点大，上传几张截图
+![image](https://github.com/sth0409/CODE_KK/blob/master/QQ%E5%9B%BE%E7%89%8720161223112808.jpg)
+![image](https://github.com/sth0409/CODE_KK/blob/master/QQ%E5%9B%BE%E7%89%8720161223112819.jpg)
+![image](https://github.com/sth0409/CODE_KK/blob/master/QQ%E5%9B%BE%E7%89%8720161223112824.jpg)
+![image](https://github.com/sth0409/CODE_KK/blob/master/QQ%E5%9B%BE%E7%89%8720161223112829.jpg)
+![image](https://github.com/sth0409/CODE_KK/blob/master/QQ%E5%9B%BE%E7%89%8720161223112833.jpg)
 ------------------------------------------------
 
 
